@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penjelajahan Samudra Bangsa Inggris 🇬🇧</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet CSS for Interactive Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        .font-serif-title {
+            font-family: 'Cinzel', serif;
+        }
+        /* Custom Leaflet Map Dark Theme Overrides */
+        #map {
+            height: 520px;
+            width: 100%;
+            border-radius: 1rem;
+            z-index: 10;
+        }
+        .leaflet-container {
+            background: #1e293b !important;
+        }
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card:hover {
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+        .route-btn.active {
+            background-color: #d97706;
+            color: #ffffff;
+            border-color: #fbbf24;
+            box-shadow: 0 0 15px rgba(217, 119, 6, 0.4);
+        }
+        /* Custom marker pulsing effect */
+        .pulse-marker {
+            width: 14px;
+            height: 14px;
+            background: #f59e0b;
+            border-radius: 50%;
+            box-shadow: 0 0 0 rgba(245, 158, 11, 0.7);
+            animation: pulse 1.8s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.8); }
+            70% { box-shadow: 0 0 0 12px rgba(245, 158, 11, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-amber-500 selection:text-slate-900">
+
+    <!-- Navigation Bar -->
+    <nav class="sticky top-0 z-50 glass-card border-b border-slate-800 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="#" class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-600 to-amber-400 flex items-center justify-center text-slate-950 font-bold text-xl shadow-lg">
+                    <i class="fa-solid font-compass text-slate-950"></i>
+                </div>
+                <div>
+                    <span class="font-serif-title font-bold text-lg md:text-xl tracking-wider text-amber-400">HISTORIA</span>
+                    <span class="text-xs block text-slate-400 -mt-1">Inggris di Samudra</span>
+                </div>
+            </a>
+            
+            <div class="hidden md:flex space-x-6 text-sm font-medium">
+                <a href="#awal" class="hover:text-amber-400 transition">Awal Mula & 3G</a>
+                <a href="#tokoh" class="hover:text-amber-400 transition">Tokoh Pelaut</a>
+                <a href="#peta-rute" class="hover:text-amber-400 transition">Peta Rute Interactive</a>
+                <a href="#hasil" class="hover:text-amber-400 transition">Hasil Pelayaran</a>
+                <a href="#nusantara" class="hover:text-amber-400 transition">Penjajahan Nusantara</a>
+                <a href="#kuis" class="hover:text-amber-400 transition">Kuis</a>
+            </div>
+
+            <button id="mobileMenuBtn" class="md:hidden text-slate-300 focus:outline-none text-xl p-2">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+        
+        <!-- Mobile Navigation Menu -->
+        <div id="mobileMenu" class="hidden md:hidden mt-3 pt-3 border-t border-slate-700/50 space-y-2 px-2 pb-2">
+            <a href="#awal" class="block py-2 px-3 rounded hover:bg-slate-800 text-sm">Awal Mula & 3G</a>
+            <a href="#tokoh" class="block py-2 px-3 rounded hover:bg-slate-800 text-sm">Tokoh Pelaut</a>
+            <a href="#peta-rute" class="block py-2 px-3 rounded hover:bg-slate-800 text-sm">Peta Rute Interactive</a>
+            <a href="#hasil" class="block py-2 px-3 rounded hover:bg-slate-800 text-sm">Hasil Pelayaran</a>
+            <a href="#nusantara" class="block py-2 px-3 rounded hover:bg-slate-800 text-sm">Penjajahan Nusantara</a>
+            <a href="#kuis" class="block py-2 px-3 rounded hover:bg-slate-800 text-sm">Kuis Interaktif</a>
+        </div>
+    </nav>
+
+    <!-- Hero Banner Section -->
+    <header class="relative py-20 md:py-28 overflow-hidden bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border-b border-slate-800">
+        <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#f59e0b_1px,transparent_1px)] [background-size:24px_24px]"></div>
+        
+        <div class="max-w-5xl mx-auto px-4 text-center relative z-10">
+            <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold uppercase tracking-widest mb-6">
+                <i class="fa-solid fa-anchor"></i> Sejarah Perjalanan Bahari Abad 15–19
+            </span>
+            <h1 class="font-serif-title text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-6 leading-tight">
+                PENJELAJAHAN SAMUDRA <br><span class="gold-gradient-text">BANGSA INGGRIS 🇬🇧</span>
+            </h1>
+            <p class="text-slate-300 text-base md:text-lg max-w-3xl mx-auto leading-relaxed mb-8">
+                Menelusuri jejak keberanian pelaut Britania mengarungi lautan global, persaingan Jalur Rempah dengan Portugis & VOC Belanda, hingga kejayaan singkat EIC dan Thomas Stamford Raffles di Nusantara.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="#peta-rute" class="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold shadow-lg shadow-amber-500/20 hover:from-amber-400 hover:to-amber-500 transition transform hover:-translate-y-0.5 flex items-center gap-2">
+                    <i class="fa-solid fa-map-location-dot"></i> Jelajahi Peta Rute
+                </a>
+                <a href="#awal" class="px-6 py-3.5 rounded-xl bg-slate-800 text-slate-200 border border-slate-700 font-semibold hover:bg-slate-700 transition flex items-center gap-2">
+                    <i class="fa-solid fa-book-open"></i> Pelajari Materi
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Section 1: Awal Mula Pelayaran Bangsa Inggris -->
+    <section id="awal" class="py-16 md:py-24 max-w-7xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-xs uppercase tracking-widest text-amber-400 font-semibold mb-2">Bab I</h2>
+            <h3 class="font-serif-title text-2xl md:text-4xl font-bold text-white">Awal Mula Pelayaran Bangsa Inggris</h3>
+            <div class="w-20 h-1 bg-amber-500 mx-auto mt-4 rounded-full"></div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8 items-center mb-12">
+            <div class="glass-card p-6 md:p-8 rounded-2xl">
+                <h4 class="text-xl font-bold text-amber-400 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-ship text-amber-500"></i> Latar Belakang Pelayaran
+                </h4>
+                <p class="text-slate-300 leading-relaxed mb-4">
+                    Pelayaran bangsa Inggris mulai berkembang pesat sekitar <strong>akhir abad ke-15 hingga abad ke-16</strong>. Inggris awalnya terdorong untuk mencari jalur perdagangan baru menuju Asia karena komoditas <strong>rempah-rempah dari Asia</strong> memiliki nilai jual yang sangat fantastis dan menguntungkan di pasar Eropa.
+                </p>
+                <p class="text-slate-300 leading-relaxed">
+                    Selain motif keuntungan ekonomi, Inggris terdesak oleh persaingan sengit dengan <strong>Portugis dan Spanyol</strong> yang lebih dahulu menguasai rute pelayaran laut global. Inggris bertekad menemukan jalur mandiri agar tidak bergantung pada monopoli kedua negara Iberian tersebut.
+                </p>
+            </div>
+
+            <!-- EIC Feature Card -->
+            <div class="glass-card p-6 md:p-8 rounded-2xl border-l-4 border-l-amber-500">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 text-2xl font-bold">
+                        <i class="fa-solid fa-crown"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-bold text-white">East India Company (EIC)</h4>
+                        <span class="text-xs text-amber-400 font-semibold">Tahun 1600 Masehi</span>
+                    </div>
+                </div>
+                <p class="text-slate-300 leading-relaxed">
+                    Momen krusial terjadi ketika <strong>Ratu Elizabeth I</strong> memberikan Piagam Kerajaan (*Royal Charter*) berupa hak izin berdagang monopoli kepada **East India Company (EIC)** pada tahun 1600.
+                </p>
+                <div class="mt-4 p-4 rounded-xl bg-slate-900/60 border border-slate-700/50 text-sm text-slate-300">
+                    <i class="fa-solid fa-quote-left text-amber-500 mr-2"></i>
+                    EIC kemudian tumbuh menjadi konglomerasi perdagangan utama yang menjalankan misi ekonomi sekaligus pengaruh politik dan militer Inggris di Asia.
+                </div>
+            </div>
+        </div>
+
+        <!-- 3G Motives Grid -->
+        <h4 class="text-lg font-bold text-center text-slate-300 mb-6">Tiga Mendorong Utama (Trilogi 3G)</h4>
+        <div class="grid md:grid-cols-3 gap-6">
+            <div class="glass-card p-6 rounded-2xl text-center hover:transform hover:-translate-y-1 transition duration-300">
+                <div class="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-2xl mx-auto mb-4">
+                    <i class="fa-solid fa-coins"></i>
+                </div>
+                <h5 class="font-serif-title font-bold text-xl text-amber-400 mb-2">GOLD</h5>
+                <p class="text-slate-300 text-sm leading-relaxed">
+                    Mencari kekayaan limpah melalui perdagangan komoditas bernilai tinggi seperti rempah-rempah (cengkeh, pala), sutra, dan emas.
+                </p>
+            </div>
+
+            <div class="glass-card p-6 rounded-2xl text-center hover:transform hover:-translate-y-1 transition duration-300">
+                <div class="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-2xl mx-auto mb-4">
+                    <i class="fa-solid fa-book-bible"></i>
+                </div>
+                <h5 class="font-serif-title font-bold text-xl text-amber-400 mb-2">GOSPEL</h5>
+                <p class="text-slate-300 text-sm leading-relaxed">
+                    Misi suci menyebarkan ajaran agama Kristen (Protestan) ke wilayah baru yang ditemui di luar benua Eropa.
+                </p>
+            </div>
+
+            <div class="glass-card p-6 rounded-2xl text-center hover:transform hover:-translate-y-1 transition duration-300">
+                <div class="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-2xl mx-auto mb-4">
+                    <i class="fa-solid fa-shield-halberd"></i>
+                </div>
+                <h5 class="font-serif-title font-bold text-xl text-amber-400 mb-2">GLORY</h5>
+                <p class="text-slate-300 text-sm leading-relaxed">
+                    Mengejar kejayaan nasional, kebanggaan imperialisme, serta perluasan daerah kekuasaan dan pengaruh mahkota Inggris.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Tokoh-Tokoh Pelaut Inggris -->
+    <section id="tokoh" class="py-16 bg-slate-900/80 border-y border-slate-800">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-xs uppercase tracking-widest text-amber-400 font-semibold mb-2">Bab II</h2>
+                <h3 class="font-serif-title text-2xl md:text-4xl font-bold text-white">Tokoh-Tokoh Pelaut Utama</h3>
+                <p class="text-slate-400 text-sm mt-2">Para perintis samudra yang membawa nama Kerajaan Inggris ke penjuru dunia</p>
+                <div class="w-20 h-1 bg-amber-500 mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- John Cabot -->
+                <div class="glass-card rounded-2xl overflow-hidden flex flex-col">
+                    <div class="bg-gradient-to-r from-amber-900/40 to-slate-800 p-6 border-b border-slate-700/50">
+                        <span class="text-xs font-bold text-amber-400 bg-amber-500/20 px-2.5 py-1 rounded-full">1497</span>
+                        <h4 class="font-serif-title text-2xl font-bold text-white mt-3">John Cabot</h4>
+                        <p class="text-xs text-slate-400">(Giovanni Caboto)</p>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+                        <ul class="space-y-3 text-sm text-slate-300">
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-compass text-amber-500 mt-1"></i>
+                                <span><strong>Awal Pelayaran:</strong> Berangkat dari Bristol, Inggris pada tahun 1497.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-route text-amber-500 mt-1"></i>
+                                <span><strong>Rute Perjalanan:</strong> Menyeberangi Samudra Atlantik ke arah barat.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-location-dot text-amber-500 mt-1"></i>
+                                <span><strong>Pencapaian:</strong> Mencapai daratan Amerika Utara (Newfoundland/Kanada).</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-bullseye text-amber-500 mt-1"></i>
+                                <span><strong>Tujuan Utama:</strong> Mencari rute barat alternatif menuju Asia.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Sir Francis Drake -->
+                <div class="glass-card rounded-2xl overflow-hidden flex flex-col border-2 border-amber-500/40">
+                    <div class="bg-gradient-to-r from-amber-600/30 to-amber-900/40 p-6 border-b border-amber-500/30 relative">
+                        <span class="absolute top-4 right-4 bg-amber-500 text-slate-950 text-xs font-bold px-2 py-0.5 rounded">Sangat Penting</span>
+                        <span class="text-xs font-bold text-amber-300 bg-amber-500/20 px-2.5 py-1 rounded-full">1577 – 1580</span>
+                        <h4 class="font-serif-title text-2xl font-bold text-white mt-3">Sir Francis Drake</h4>
+                        <p class="text-xs text-amber-300/80">Pengeliling Dunia Pertama Asal Inggris</p>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+                        <ul class="space-y-3 text-sm text-slate-300">
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-globe text-amber-500 mt-1"></i>
+                                <span><strong>Pelayaran Mengelilingi Dunia:</strong> Pelaut Inggris pertama yang berhasil mengelilingi bola bumi penuh.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-anchor text-amber-500 mt-1"></i>
+                                <span><strong>Singgah di Nusantara:</strong> Mencapai Ternate & Maluku pada 1579, membawa muatan cengkeh kualitas tinggi.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-award text-amber-500 mt-1"></i>
+                                <span><strong>Gelar Kesatria:</strong> Dianugerahi gelar *Sir* oleh Ratu Elizabeth I di atas kapalnya, *Golden Hind*.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Sir Thomas Cavendish -->
+                <div class="glass-card rounded-2xl overflow-hidden flex flex-col">
+                    <div class="bg-gradient-to-r from-amber-900/40 to-slate-800 p-6 border-b border-slate-700/50">
+                        <span class="text-xs font-bold text-amber-400 bg-amber-500/20 px-2.5 py-1 rounded-full">1586 – 1588</span>
+                        <h4 class="font-serif-title text-2xl font-bold text-white mt-3">Sir Thomas Cavendish</h4>
+                        <p class="text-xs text-slate-400">"The Navigator"</p>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+                        <ul class="space-y-3 text-sm text-slate-300">
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-earth-americas text-amber-500 mt-1"></i>
+                                <span><strong>Circumnavigation Kedua:</strong> Mengikuti jejak Francis Drake mengelilingi dunia dengan waktu relatif sangat cepat (2 tahun).</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-map-pin text-amber-500 mt-1"></i>
+                                <span><strong>Rute Jawa:</strong> Melewati Samudra Pasifik, Filipina, lalu singgah di pantai selatan Pulau Jawa.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-book text-amber-500 mt-1"></i>
+                                <span><strong>Kontribusi:</strong> Memperkaya peta hidrografi & navigasi Inggris di perairan Asia Tenggara.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Peta Rute Pelayaran Interaktif -->
+    <section id="peta-rute" class="py-16 max-w-7xl mx-auto px-4">
+        <div class="text-center mb-10">
+            <h2 class="text-xs uppercase tracking-widest text-amber-400 font-semibold mb-2">Bab III</h2>
+            <h3 class="font-serif-title text-2xl md:text-4xl font-bold text-white">Peta Rute Pelayaran Interaktif 🗺️</h3>
+            <p class="text-slate-400 text-sm mt-2">Pilih nama toko pelaut di bawah untuk melihat rute pelayaran lengkap mengelilingi dunia dan persinggahan di Nusantara</p>
+            <div class="w-20 h-1 bg-amber-500 mx-auto mt-4 rounded-full"></div>
+        </div>
+
+        <!-- Route Selector Buttons -->
+        <div class="flex flex-wrap justify-center gap-3 mb-6">
+            <button id="btnDrake" onclick="showRoute('drake')" class="route-btn active px-5 py-2.5 rounded-xl border border-amber-500/40 text-sm font-semibold transition flex items-center gap-2">
+                <i class="fa-solid fa-route"></i> Rute Sir Francis Drake (1577–1580)
+            </button>
+            <button id="btnCavendish" onclick="showRoute('cavendish')" class="route-btn px-5 py-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 text-sm font-semibold transition flex items-center gap-2">
+                <i class="fa-solid fa-route"></i> Rute Sir Thomas Cavendish (1586–1588)
+            </button>
+            <button id="btnCabot" onclick="showRoute('cabot')" class="route-btn px-5 py-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 text-sm font-semibold transition flex items-center gap-2">
+                <i class="fa-solid fa-route"></i> Rute John Cabot (1497)
+            </button>
+        </div>
+
+        <!-- Map container -->
+        <div class="glass-card p-4 rounded-2xl relative shadow-2xl">
+            <div id="map"></div>
+            
+            <!-- Map Info Overlay -->
+            <div id="mapDetailsCard" class="mt-4 p-4 rounded-xl bg-slate-900/90 border border-slate-700 text-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="flex items-start gap-3">
+                    <div id="routeIcon" class="w-10 h-10 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl shrink-0 mt-1 md:mt-0">
+                        <i class="fa-solid fa-ship"></i>
+                    </div>
+                    <div>
+                        <h5 id="routeTitle" class="font-bold text-amber-400 text-base">Sir Francis Drake (1577-1580)</h5>
+                        <p id="routeDesc" class="text-slate-300 text-xs md:text-sm mt-0.5">
+                            Plymouth (Inggris) ➔ Selat Magellan ➔ Samudra Pasifik ➔ San Francisco ➔ Maluku (Ternate) ➔ Samudra Hindia ➔ Tanjung Harapan ➔ Kembali ke Inggris.
+                        </p>
+                    </div>
+                </div>
+                <div class="shrink-0 flex items-center gap-2 text-xs text-amber-400 font-medium bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20">
+                    <i class="fa-solid fa-location-dot"></i> <span id="routePointsCount">8 Titik Singgah Utama</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: Hasil Pelayaran -->
+    <section id="hasil" class="py-16 bg-slate-900/80 border-y border-slate-800">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-xs uppercase tracking-widest text-amber-400 font-semibold mb-2">Bab IV</h2>
+                <h3 class="font-serif-title text-2xl md:text-4xl font-bold text-white">Hasil dari Pelayaran Tokoh Inggris</h3>
+                <p class="text-slate-400 text-sm mt-2">Dampak nyata penjelajahan bahari terhadap perluasan wilayah dan pengetahuan Inggris</p>
+                <div class="w-20 h-1 bg-amber-500 mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="glass-card p-6 rounded-2xl border-t-4 border-t-sky-500">
+                    <div class="text-sky-400 font-bold text-lg mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-flag"></i> John Cabot
+                    </div>
+                    <ul class="space-y-3 text-sm text-slate-300">
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-sky-400 mt-1"></i>
+                            <span>Berhasil mendarat di Amerika Utara (wilayah Kanada modern).</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-sky-400 mt-1"></i>
+                            <span>Menjadi landasan yuridis bagi klaim hak teritorial Kerajaan Inggris atas benua Amerika Utara di kemudian hari.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="glass-card p-6 rounded-2xl border-t-4 border-t-amber-500">
+                    <div class="text-amber-400 font-bold text-lg mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-trophy"></i> Francis Drake
+                    </div>
+                    <ul class="space-y-3 text-sm text-slate-300">
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-amber-400 mt-1"></i>
+                            <span>Sukses mengelilingi dunia (*circumnavigation*) dan kembali dalam keadaan selamat.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-amber-400 mt-1"></i>
+                            <span>Mencapai kepulauan **Maluku**, menjalin kontak awal perdagangan rempah-rempah.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-amber-400 mt-1"></i>
+                            <span>Membawa pulang rampasan kaya dan data navigator berharga mengenai jaringan perdagangan Asia Pasifik.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="glass-card p-6 rounded-2xl border-t-4 border-t-emerald-500">
+                    <div class="text-emerald-400 font-bold text-lg mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-map"></i> Thomas Cavendish
+                    </div>
+                    <ul class="space-y-3 text-sm text-slate-300">
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-emerald-400 mt-1"></i>
+                            <span>Berhasil menyelesaikan pelayaran mengelilingi bola bumi kedua bagi Inggris.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-emerald-400 mt-1"></i>
+                            <span>Memperluas pemahaman peta maritim Inggris mengenai rahasia jalur pelayaran Pasifik dan perairan Samudra Hindia.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 5: Proses Penjajahan Inggris di Nusantara -->
+    <section id="nusantara" class="py-16 max-w-7xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-xs uppercase tracking-widest text-amber-400 font-semibold mb-2">Bab V</h2>
+            <h3 class="font-serif-title text-2xl md:text-4xl font-bold text-white">Proses Kedatangan & Kekuasaan di Nusantara</h3>
+            <p class="text-slate-400 text-sm mt-2">Perjalanan dari hubungan niaga hingga kolonialisme di bawah Thomas Stamford Raffles</p>
+            <div class="w-20 h-1 bg-amber-500 mx-auto mt-4 rounded-full"></div>
+        </div>
+
+        <!-- 4 Steps Interactive Horizontal / Vertical Timeline -->
+        <div class="space-y-8 relative before:absolute before:inset-0 before:left-4 md:before:left-1/2 before:-translate-x-1/2 before:w-1 before:bg-slate-800">
+            
+            <!-- Tahap 1 -->
+            <div class="relative flex flex-col md:flex-row items-center">
+                <div class="flex items-center justify-start md:justify-end w-full md:w-1/2 md:pr-10 pl-12 md:pl-0">
+                    <div class="glass-card p-6 rounded-2xl w-full border-l-4 border-l-amber-500">
+                        <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">Tahap 1</span>
+                        <h4 class="text-lg font-bold text-white mt-1 mb-2">Awalnya Murni Berdagang</h4>
+                        <p class="text-sm text-slate-300 leading-relaxed">
+                            Inggris tiba di Nusantara dengan niat utama berniaga mencari rempah. Pasca pendirian EIC (1600), Inggris aktif membuka logistik hubungan dagang di Nusantara, terutamanya mendirikan kantor dagang di **Banten**.
+                        </p>
+                    </div>
+                </div>
+                <div class="absolute left-0 md:left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-sm shadow-lg shadow-amber-500/50">
+                    1
+                </div>
+                <div class="hidden md:block w-1/2"></div>
+            </div>
+
+            <!-- Tahap 2 -->
+            <div class="relative flex flex-col md:flex-row items-center">
+                <div class="hidden md:block w-1/2"></div>
+                <div class="absolute left-0 md:left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-sm shadow-lg shadow-amber-500/50">
+                    2
+                </div>
+                <div class="flex items-center justify-start w-full md:w-1/2 md:pl-10 pl-12">
+                    <div class="glass-card p-6 rounded-2xl w-full border-l-4 border-l-amber-500">
+                        <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">Tahap 2</span>
+                        <h4 class="text-lg font-bold text-white mt-1 mb-2">Sengit Bersaing dengan VOC Belanda</h4>
+                        <p class="text-sm text-slate-300 leading-relaxed">
+                            Inggris berhadapan langsung dengan kekuatan VOC Belanda (berdiri 1602). Karena armada militer VOC jauh lebih dominan dan agresif di Kepulauan Banda/Maluku, kedudukan Inggris terdesak sehingga memindahkan fokus kolonial utamanya ke **India**.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tahap 3 -->
+            <div class="relative flex flex-col md:flex-row items-center">
+                <div class="flex items-center justify-start md:justify-end w-full md:w-1/2 md:pr-10 pl-12 md:pl-0">
+                    <div class="glass-card p-6 rounded-2xl w-full border-l-4 border-l-amber-500">
+                        <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">Tahap 3 (1811)</span>
+                        <h4 class="text-lg font-bold text-white mt-1 mb-2">Inggris Rebut Kekuasaan di Jawa</h4>
+                        <p class="text-sm text-slate-300 leading-relaxed">
+                            Ketika Belanda jatuh ke tangan pengaruh Napoleon Prancis, armada Inggris menyerang dan merebut Pulau Jawa pada 1811 (Kapitulasi Tuntang). Inggris menunjuk **Sir Thomas Stamford Raffles** sebagai Letnan Gubernur di Jawa.
+                        </p>
+                    </div>
+                </div>
+                <div class="absolute left-0 md:left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-sm shadow-lg shadow-amber-500/50">
+                    3
+                </div>
+                <div class="hidden md:block w-1/2"></div>
+            </div>
+
+            <!-- Tahap 4 -->
+            <div class="relative flex flex-col md:flex-row items-center">
+                <div class="hidden md:block w-1/2"></div>
+                <div class="absolute left-0 md:left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-sm shadow-lg shadow-amber-500/50">
+                    4
+                </div>
+                <div class="flex items-center justify-start w-full md:w-1/2 md:pl-10 pl-12">
+                    <div class="glass-card p-6 rounded-2xl w-full border-l-4 border-l-amber-500">
+                        <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">Tahap 4</span>
+                        <h4 class="text-lg font-bold text-white mt-1 mb-2">Pemerintahan Thomas Stamford Raffles</h4>
+                        <p class="text-sm text-slate-300 leading-relaxed mb-3">
+                            Raffles memberlakukan pembaharuan radikal dalam tata ekonomi dan ilmu pengetahuan:
+                        </p>
+                        <ul class="space-y-2 text-xs text-slate-300 bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                            <li><strong class="text-amber-400">Sistem Sewa Tanah (Landrent):</strong> Tanah milik negara; rakyat yang menggarap wajib membayar sewa/pajak.</li>
+                            <li><strong class="text-amber-400">Penelitian Kebudayaan:</strong> Menulis buku *The History of Java*, menemukan kembali Candi Borobudur, dan penelitian flora (*Rafflesia arnoldii*).</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Section 6: Akhir Kekuasaan Inggris (Ending) -->
+        <div id="ending" class="mt-16 glass-card p-8 rounded-3xl border border-amber-500/30 bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/20">
+            <div class="flex flex-col md:flex-row items-center gap-6">
+                <div class="w-16 h-16 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-3xl shrink-0 border border-amber-500/30">
+                    <i class="fa-solid fa-file-contract"></i>
+                </div>
+                <div class="space-y-2">
+                    <span class="text-xs font-bold text-amber-400 uppercase tracking-widest">Bab VI — Akhir Kekuasaan</span>
+                    <h4 class="font-serif-title text-2xl font-bold text-white">Ending Kekuasaan Inggris di Nusantara (1814–1816)</h4>
+                    <p class="text-slate-300 text-sm leading-relaxed">
+                        Kekuasaan Inggris di Jawa berlangsung sangat singkat. Menyusul kekalahan Napoleon di Eropa, terjadi Kesepakatan <strong>Konvensi London (1814)</strong> yang mengatur bahwa Inggris harus mengembalikan daerah jajahan bekas Belanda. Pada tahun <strong>1816</strong>, Inggris secara resmi menyerahkan kembali Pulau Jawa dan seluruh wilayah Nusantara kepada Pemerintah Kolonial Belanda.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 7: Kuis Interaktif Materi -->
+    <section id="kuis" class="py-16 bg-slate-900/90 border-t border-slate-800">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="text-center mb-10">
+                <span class="px-3 py-1 bg-amber-500/10 border border-amber-500/30 rounded-full text-amber-400 text-xs font-semibold uppercase tracking-wider">Uji Pemahaman</span>
+                <h3 class="font-serif-title text-2xl md:text-4xl font-bold text-white mt-2">Kuis Interaktif Materi 📝</h3>
+                <p class="text-slate-400 text-sm mt-1">Uji seberapa baik pemahamanmu tentang penjelajahan bangsa Inggris</p>
+            </div>
+
+            <div class="glass-card p-6 md:p-8 rounded-3xl relative" id="quizContainer">
+                <div class="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
+                    <span id="quizProgress" class="text-xs font-semibold text-amber-400 uppercase tracking-wider">Pertanyaan 1 dari 5</span>
+                    <span id="quizScore" class="text-xs font-bold text-slate-300 bg-slate-800 px-3 py-1 rounded-full">Skor: 0</span>
+                </div>
+
+                <div id="quizQuestionBox">
+                    <h4 id="questionText" class="text-lg md:text-xl font-bold text-white mb-6">Loading pertanyaan...</h4>
+                    <div id="optionsContainer" class="grid gap-3">
+                        <!-- Options populated via JS -->
+                    </div>
+                </div>
+
+                <!-- Quiz Feedback Box -->
+                <div id="quizFeedback" class="hidden mt-6 p-4 rounded-xl text-sm font-medium"></div>
+
+                <div class="mt-6 flex justify-between items-center pt-4 border-t border-slate-800">
+                    <button id="nextBtn" onclick="nextQuestion()" class="hidden ml-auto px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm transition">
+                        Pertanyaan Berikutnya <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-8 bg-slate-950 text-slate-500 text-xs text-center border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 space-y-2">
+            <p class="font-serif-title text-amber-400 font-semibold text-sm">PENJELAJAHAN SAMUDRA BANGSA INGGRIS</p>
+            <p>Materi Pembelajaran Sejarah Maritim & Kolonialisme di Nusantara</p>
+            <p class="text-slate-600">© 2026 Interactive History Education. Built with Leaflet & Tailwind CSS.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Mobile Menu Toggle ---
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        });
+
+        // --- Route Map Data ---
+        const mapData = {
+            drake: {
+                title: "Sir Francis Drake (1577–1580)",
+                desc: "Pelayaran mengelilingi dunia pertama oleh orang Inggris. Melewati Selat Magellan, pantai barat Amerika, lalu menyeberangi Pasifik menuju Ternate (Maluku) di Nusantara sebelum kembali lewat Tanjung Harapan.",
+                pointsCount: "8 Titik Penting",
+                route: [
+                    [50.3755, -4.1427],   // Plymouth, England
+                    [28.1248, -15.4300],  // Canary Islands
+                    [-22.9068, -43.1729], // Rio de Janeiro
+                    [-52.6500, -68.3000], // Strait of Magellan
+                    [37.7749, -122.4194], // San Francisco (New Albion)
+                    [0.7893, 127.3820],   // Ternate, Maluku (Nusantara)
+                    [-34.3568, 18.4740],  // Cape of Good Hope
+                    [50.3755, -4.1427]    // Plymouth, England
+                ],
+                labels: [
+                    "Awal: Plymouth (1577)",
+                    "Kepulauan Kanari",
+                    "Pantai Brasil",
+                    "Selat Magellan",
+                    "Nova Albion (San Francisco)",
+                    "Singgah: Maluku (Nusantara - 1579)",
+                    "Tanjung Harapan",
+                    "Kembali: Plymouth (1580)"
+                ]
+            },
+            cavendish: {
+                title: "Sir Thomas Cavendish (1586–1588)",
+                desc: "Rute pelayaran mengelilingi dunia kedua Inggris. Mengikuti jejak Drake menyeberangi Pasifik, sempat berlabuh dan berinteraksi di pesisir selatan Jawa.",
+                pointsCount: "6 Titik Penting",
+                route: [
+                    [50.3755, -4.1427],   // England
+                    [8.4606, -13.2317],   // Sierra Leone
+                    [-52.6500, -68.3000], // Strait of Magellan
+                    [13.4443, 144.7937],  // Guam / Pacific
+                    [-7.6000, 110.0000],  // Jawa (Nusantara)
+                    [-34.3568, 18.4740],  // Cape of Good Hope
+                    [50.3755, -4.1427]    // Plymouth
+                ],
+                labels: [
+                    "Awal: Inggris (1586)",
+                    "Sierra Leone",
+                    "Selat Magellan",
+                    "Guam / Pasifik",
+                    "Singgah: Pulau Jawa (1588)",
+                    "Tanjung Harapan",
+                    "Kembali: Inggris (1588)"
+                ]
+            },
+            cabot: {
+                title: "John Cabot (1497)",
+                desc: "Pelayaran melintasi Samudra Atlantik Utara mencari jalur barat menuju Asia. Menemukan daratan Amerika Utara (Newfoundland/Kanada).",
+                pointsCount: "3 Titik Utama",
+                route: [
+                    [51.4545, -2.5879],   // Bristol, England
+                    [52.0000, -30.0000],  // North Atlantic Ocean
+                    [48.5667, -53.2500]   // Newfoundland, Canada
+                ],
+                labels: [
+                    "Awal: Bristol, Inggris (1497)",
+                    "Samudra Atlantik Utara",
+                    "Tiba: Newfoundland, Amerika Utara"
+                ]
+            }
+        };
+
+        let map, polylineGroup, markersGroup;
+
+        function initMap() {
+            map = L.map('map', {
+                center: [10, 10],
+                zoom: 2,
+                minZoom: 1,
+                maxZoom: 6
+            });
+
+            // Dark tiles for thematic historical appearance
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }).addTo(map);
+
+            polylineGroup = L.layerGroup().addTo(map);
+            markersGroup = L.layerGroup().addTo(map);
+
+            // Default display Drake
+            showRoute('drake');
+        }
+
+        function showRoute(type) {
+            // Update active button state
+            document.querySelectorAll('.route-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-amber-500', 'text-slate-950');
+                btn.classList.add('bg-slate-800', 'text-slate-300');
+            });
+            
+            const selectedBtn = document.getElementById(`btn${type.charAt(0).toUpperCase() + type.slice(1)}`);
+            if (selectedBtn) {
+                selectedBtn.classList.add('active');
+            }
+
+            // Clear previous graphics
+            polylineGroup.clearLayers();
+            markersGroup.clearLayers();
+
+            const data = mapData[type];
+
+            // Update details UI text
+            document.getElementById('routeTitle').innerText = data.title;
+            document.getElementById('routeDesc').innerText = data.desc;
+            document.getElementById('routePointsCount').innerText = data.pointsCount;
+
+            // Draw line
+            const polyline = L.polyline(data.route, {
+                color: '#f59e0b',
+                weight: 3.5,
+                dashArray: '6, 8',
+                opacity: 0.9
+            }).addTo(polylineGroup);
+
+            // Add custom styled markers
+            data.route.forEach((coord, idx) => {
+                const label = data.labels[idx];
+                const isNusantara = label.includes('Nusantara') || label.includes('Jawa') || label.includes('Maluku');
+                
+                const customIcon = L.divIcon({
+                    className: 'custom-map-pin',
+                    html: `<div class="${isNusantara ? 'pulse-marker' : 'w-3 h-3 bg-amber-400 rounded-full border-2 border-slate-900'}"></div>`,
+                    iconSize: [14, 14],
+                    iconAnchor: [7, 7]
+                });
+
+                const marker = L.marker(coord, { icon: customIcon }).addTo(markersGroup);
+                marker.bindPopup(`<strong style="color:#d97706;">${label}</strong><br><span style="font-size:12px; color:#333;">Koordinat: ${coord[0].toFixed(2)}, ${coord[1].toFixed(2)}</span>`);
+            });
+
+            // Adjust bounds
+            map.fitBounds(polyline.getBounds(), { padding: [30, 30] });
+        }
+
+        const quizQuestions = [
+            {
+                q: "Semboyan 3G yang mendorong terjadinya penjelajahan samudra bangsa Eropa meliputi...",
+                options: [
+                    "Gold, Goods, Glory",
+                    "Gold, Gospel, Glory",
+                    "Growth, Gospel, Empire",
+                    "Gold, Grain, Government"
+                ],
+                answer: 1,
+                explain: "3G singkatan dari Gold (Mencari kekayaan), Gospel (Menyebarkan Kristen), dan Glory (Mencari kejayaan/kekuasaan)."
+            },
+            {
+                q: "Perusahaan dagang Inggris yang dibentuk pada tahun 1600 atas izin Ratu Elizabeth I adalah...",
+                options: [
+                    "VOC",
+                    "EIC (East India Company)",
+                    "EIC (East Indies Crown)",
+                    "Royal African Company"
+                ],
+                answer: 1,
+                explain: "East India Company (EIC) dibentuk pada tahun 1600 untuk menjalankan monopoli perdagangan Inggris di Asia."
+            },
+            {
+                q: "Pelaut Inggris yang memimpin kapal 'Golden Hind' dan berhasil singgah di Maluku (Nusantara) pada 1579 adalah...",
+                options: [
+                    "John Cabot",
+                    "Thomas Cavendish",
+                    "Sir Francis Drake",
+                    "Thomas Stamford Raffles"
+                ],
+                answer: 2,
+                explain: "Sir Francis Drake berhasil mengelilingi dunia (1577-1580) dan mendarat di Ternate (Maluku) untuk membeli cengkeh."
+            },
+            {
+                q: "Tokoh Inggris yang menjabat sebagai Letnan Gubernur Jawa pada tahun 1811 dan menerapkan sistem sewa tanah (Landrent) adalah...",
+                options: [
+                    "Sir Thomas Stamford Raffles",
+                    "Lord Minto",
+                    "John Fendall",
+                    "James Cook"
+                ],
+                answer: 0,
+                explain: "Thomas Stamford Raffles memimpin pemerintahan Inggris di Jawa dan mencanangkan sistem Sewa Tanah (Landrent System)."
+            },
+            {
+                q: "Peristiwa internasional yang menyebabkan Inggris harus menyerahkan kembali wilayah Nusantara kepada Belanda pada tahun 1816 adalah...",
+                options: [
+                    "Perjanjian Tordesillas",
+                    "Konvensi London (1814)",
+                    "Kapitulasi Tuntang",
+                    "Perjanjian Saragosa"
+                ],
+                answer: 1,
+                explain: "Konvensi London 1814 menyepakati pengembalian daerah jajahan bekas Belanda pasca kekalahan Napoleon Bonaparte di Eropa."
+            }
+        ];
+
+        let currentQ = 0;
+        let score = 0;
+        let answered = false;
+
+        function loadQuestion() {
+            answered = false;
+            const qData = quizQuestions[currentQ];
+            document.getElementById('quizProgress').innerText = `Pertanyaan ${currentQ + 1} dari ${quizQuestions.length}`;
+            document.getElementById('questionText').innerText = qData.q;
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            const feedback = document.getElementById('quizFeedback');
+            feedback.classList.add('hidden');
+
+            document.getElementById('nextBtn').classList.add('hidden');
+
+            qData.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-xl bg-slate-800/80 border border-slate-700/60 hover:bg-slate-700 hover:border-amber-500/50 text-slate-200 text-sm font-medium transition flex items-center justify-between";
+                btn.innerHTML = `<span>${opt}</span> <i class="fa-regular fa-circle text-slate-500"></i>`;
+                btn.onclick = () => selectOption(idx, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function selectOption(index, buttonEl) {
+            if (answered) return;
+            answered = true;
+
+            const qData = quizQuestions[currentQ];
+            const allButtons = document.getElementById('optionsContainer').children;
+
+            if (index === qData.answer) {
+                score += 20;
+                document.getElementById('quizScore').innerText = `Skor: ${score}`;
+                buttonEl.className = "w-full text-left p-4 rounded-xl bg-emerald-500/20 border-2 border-emerald-500 text-emerald-300 text-sm font-semibold flex items-center justify-between";
+                buttonEl.innerHTML = `<span>${qData.options[index]}</span> <i class="fa-solid fa-circle-check text-emerald-400"></i>`;
+                showFeedback(true, qData.explain);
+            } else {
+                buttonEl.className = "w-full text-left p-4 rounded-xl bg-rose-500/20 border-2 border-rose-500 text-rose-300 text-sm font-semibold flex items-center justify-between";
+                buttonEl.innerHTML = `<span>${qData.options[index]}</span> <i class="fa-solid fa-circle-xmark text-rose-400"></i>`;
+                
+                // Highlight correct one
+                allButtons[qData.answer].className = "w-full text-left p-4 rounded-xl bg-emerald-500/20 border border-emerald-500 text-emerald-300 text-sm font-semibold flex items-center justify-between";
+                showFeedback(false, qData.explain);
+            }
+
+            document.getElementById('nextBtn').classList.remove('hidden');
+        }
+
+        function showFeedback(isCorrect, explanation) {
+            const fb = document.getElementById('quizFeedback');
+            fb.classList.remove('hidden', 'bg-emerald-500/10', 'text-emerald-300', 'border-emerald-500/30', 'bg-rose-500/10', 'text-rose-300', 'border-rose-500/30');
+            
+            if (isCorrect) {
+                fb.classList.add('bg-emerald-500/10', 'text-emerald-300', 'border', 'border-emerald-500/30');
+                fb.innerHTML = `<i class="fa-solid fa-check-circle mr-1"></i> <strong>Benar!</strong> ${explanation}`;
+            } else {
+                fb.classList.add('bg-rose-500/10', 'text-rose-300', 'border', 'border-rose-500/30');
+                fb.innerHTML = `<i class="fa-solid fa-circle-exclamation mr-1"></i> <strong>Kurang Tepat.</strong> ${explanation}`;
+            }
+        }
+
+        function nextQuestion() {
+            currentQ++;
+            if (currentQ < quizQuestions.length) {
+                loadQuestion();
+            } else {
+                showQuizResults();
+            }
+        }
+
+        function showQuizResults() {
+            const container = document.getElementById('quizQuestionBox');
+            document.getElementById('quizProgress').innerText = "KUIS SELESAI";
+            document.getElementById('nextBtn').classList.add('hidden');
+            document.getElementById('quizFeedback').classList.add('hidden');
+
+            container.innerHTML = `
+                <div class="text-center py-8 space-y-4">
+                    <div class="w-20 h-20 rounded-full bg-amber-500/20 border-2 border-amber-500 text-amber-400 flex items-center justify-center text-3xl mx-auto">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <h4 class="text-2xl font-bold text-white">Hasil Kuis Kamu: <span class="text-amber-400">${score}/100</span></h4>
+                    <p class="text-slate-300 text-sm max-w-md mx-auto">
+                        ${score >= 80 ? 'Luar biasa! Kamu sudah sangat menguasai materi Penjelajahan Samudra Bangsa Inggris!' : 'Bagus! Kamu bisa membaca ulang materi di atas dan mencoba kuis kembali untuk menyempurnakan nilai.'}
+                    </p>
+                    <button onclick="restartQuiz()" class="mt-4 px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm transition">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> Coba Lagi
+                    </button>
+                </div>
+            `;
+        }
+
+        function restartQuiz() {
+            currentQ = 0;
+            score = 0;
+            document.getElementById('quizScore').innerText = `Skor: 0`;
+            const container = document.getElementById('quizQuestionBox');
+            container.innerHTML = `
+                <h4 id="questionText" class="text-lg md:text-xl font-bold text-white mb-6">Loading...</h4>
+                <div id="optionsContainer" class="grid gap-3"></div>
+            `;
+            loadQuestion();
+        }
+
+        // Initialize on Window Load
+        window.onload = function() {
+            initMap();
+            loadQuestion();
+        };
+    </script>
+</body>
+</html>
